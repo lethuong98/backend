@@ -7,7 +7,11 @@ const process = require('process');
 const basename = path.basename(__filename);
 const db = {};
 
-const sequelize = new Sequelize(process.env.URI);
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.USER_NAME, process.env.PASS, {
+  host: process.env.HOST,
+  dialect:'mysql',
+  dialectModule: require('mysql2'),
+});
 
 fs.readdirSync(__dirname)
   .filter((file) => {
