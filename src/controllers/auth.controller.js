@@ -118,43 +118,6 @@ const refreshToken = async (req, res) => {
   }
 };
 
-const forgetPassword = async (req, res) => {
-  const CLIENT_ID = process.env.CLIENT_ID;
-  const CLIENT_SECRET = process.env.CLIENT_SECRET;
-  const REDIRECT_URI = process.env.REDIRECT_URI;
-  const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
-
-  const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
-  oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
-
-  try {
-    const accessToken = await oAuth2Client.getAccessToken();
-    const transport = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        type: 'OAuth2',
-        user: 'lethuong1621998@gmail.com',
-        clientId: CLIENT_ID,
-        clientSecret: CLIENT_SECRET,
-        refreshToken: REFRESH_TOKEN,
-        accessToken: accessToken,
-      },
-    });
-    let into = await transport.sendMail({
-      from: '"Hanz Store"<lethuong1621998@gmail.com>',
-      to: 'lethuong16021998@gmail.com',
-      subject: 'MẬT KHẨU MỚI',
-      text: 'Hello',
-      html: '<b>Hello</b>',
-    });
-    console.log('send mail ok');
-  } catch (error) {
-    console.log(error);
-  }
-
-  return res.send('sssssss23423423ssss');
-};
-
 const logout = async (req, res) => {
   try {
     const refreshToken = req.body.refreshToken;
@@ -178,4 +141,4 @@ const logout = async (req, res) => {
   }
 };
 
-module.exports = { forgetPassword, login, refreshToken, logout };
+module.exports = {  login, refreshToken, logout };

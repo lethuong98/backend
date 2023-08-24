@@ -32,9 +32,6 @@ router.post('/login', upload.none(), authControler.login);
 //refresh token
 router.get('/refresh-token', upload.none(), authControler.refreshToken);
 
-//forget password
-router.post('/forget-password', verifyAccessToken, authControler.forgetPassword);
-
 //logout
 router.post('/logout', verifyAccessToken, upload.none(), authControler.logout);
 

@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "root",
-    "password": null,
-    "database": "yody_fake",
-    "host": "127.0.0.1",
+    "username": "ug9v6pwgi2abozha",
+    "password": "nd5xXkMgJxmaneMt4BLk",
+    "database": "bmdbtxfyrmg8ikojxjfs",
+    "host": "bmdbtxfyrmg8ikojxjfs-mysql.services.clever-cloud.com",
     "dialect": "mysql"
   },
   "test": {

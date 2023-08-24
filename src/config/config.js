@@ -1,2 +1,2 @@
 const ACCESS_TOKEN_SECRET = '29109043225b005c5915e8aae384ef58';
-module.exports = {ACCESS_TOKEN_SECRET};
+module.exports = { ACCESS_TOKEN_SECRET };
