@@ -7,16 +7,16 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-const userRoutes = require('./routes/user.route');
-const authRoutes = require('./routes/auth.route');
-const categoryRoutes = require('./routes/category.route');
-const colorRoutes = require('./routes/color.route');
-const sizeRoutes = require('./routes/size.route');
-const feedbackRoutes = require('./routes/feedback.route');
-const productRoutes = require('./routes/product.route');
-const bannersRoutes = require('./routes/banners.route');
-const blogRoutes = require('./routes/blog.route');
-const orderRoutes = require('./routes/order.route');
+const userRoutes = require('./src/routes/user.route');
+const authRoutes = require('./src/routes/auth.route');
+const categoryRoutes = require('./src/routes/category.route');
+const colorRoutes = require('./src/routes/color.route');
+const sizeRoutes = require('./src/routes/size.route');
+const feedbackRoutes = require('./src/routes/feedback.route');
+const productRoutes = require('./src/routes/product.route');
+const bannersRoutes = require('./src/routes/banners.route');
+const blogRoutes = require('./src/routes/blog.route');
+const orderRoutes = require('./src/routes/order.route');
 
 app.use(express.static('public'));
 app.use(cookieParser());
