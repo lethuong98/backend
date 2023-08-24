@@ -1,0 +1,2 @@
+CREATE TABLE
+npx sequelize-cli db:migrate
