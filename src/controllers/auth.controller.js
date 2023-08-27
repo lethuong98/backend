@@ -1,5 +1,3 @@
-const nodemailer = require('nodemailer');
-const { google } = require('googleapis');
 require('dotenv').config();
 const crypto = require('crypto');
 const db = require('../models/index');
@@ -8,18 +6,20 @@ const jwt = require('jsonwebtoken');
 const login = async (req, res) => {
   try {
     let { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).send({ success: false, message: 'Dữ liệu không đầy đủ' });
-    }
 
+    //check exist data
+    if (!email || !password)
+      return res.status(400).send({ success: false, message: 'Dữ liệu không đầy đủ' });
+
+    //check exist user
     const checkEmail = await db.User.findOne({
       where: {
         email,
       },
     });
-    if (!checkEmail) {
-      return res.status(404).send({ success: false, message: 'Tài khoản này không tồn tại' });
-    }
+    if (!checkEmail)
+      return res.status(404).send({ success: false, message: 'Tài khoản không tồn tại' });
+
     password = crypto.createHash('md5').update(password).digest('hex');
     const data = await db.User.findOne({
       attributes: { exclude: ['password'] },
@@ -51,11 +51,7 @@ const login = async (req, res) => {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-      res.cookie(
-        'accessToken',
-        accessToken
-        // { httpOnly: true }
-      );
+      res.cookie('accessToken', accessToken);
       res.cookie('refreshToken', refreshToken);
 
       return res.status(200).send({
@@ -64,17 +60,30 @@ const login = async (req, res) => {
         data,
       });
     } else {
-      return res.status(200).send({
+      return res.status(400).send({
         success: true,
         message: 'Tài khoản hoặc mật khẩu không chính xác',
       });
     }
-  } catch (error) {}
+  } catch (error) {
+    return res.status(500).send({
+      success: false,
+      message: 'Lỗi server',
+    });
+  }
 };
 
 const refreshToken = async (req, res) => {
   try {
-    const refreshToken = req.headers.authorizationletter.split(' ')[1];
+    const authorizationletter = req.headers?.authorizationletter;
+    if (!authorizationletter) {
+      return res.status(498).send({
+        success: false,
+        message: 'refresh token không tồn tại',
+      });
+    }
+
+    const refreshToken = authorizationletter.split(' ')[1];
     const data = await db.Token.findOne({
       where: {
         token: refreshToken,
@@ -82,8 +91,8 @@ const refreshToken = async (req, res) => {
     });
     if (!data) {
       return res.status(498).send({
-        success: true,
-        message: 'refresh token does not exist',
+        success: false,
+        message: 'refresh token không tồn tại',
       });
     }
     const decode = jwt.decode(refreshToken);
@@ -96,8 +105,8 @@ const refreshToken = async (req, res) => {
         },
       });
       return res.status(498).send({
-        success: true,
-        message: 'refresh token expires',
+        success: false,
+        message: 'refresh token hết hạn',
       });
     }
     const newAccessToken = jwt.sign(
@@ -111,34 +120,39 @@ const refreshToken = async (req, res) => {
     res.cookie('accessToken', newAccessToken);
     return res.status(200).send({
       success: true,
-      message: 'refresh token sucess',
+      message: 'refresh token thành công',
     });
   } catch (error) {
     console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: 'Lỗi server',
+    });
   }
 };
 
 const logout = async (req, res) => {
   try {
-    const refreshToken = req.body.refreshToken;
-    const data = await db.Token.destroy({
-      where: {
-        token: refreshToken,
-      },
-    });
-    if (data) {
-      return res.status(200).send({
-        success: true,
-        message: 'Đăng xuất thành công',
+    const refreshToken = req.body?.refreshToken;
+    if (refreshToken) {
+      await db.Token.destroy({
+        where: {
+          token: refreshToken,
+        },
       });
     }
-    return res.status(403).send({
-      success: false,
-      message: 'Đăng xuất thất bại',
+
+    return res.status(200).send({
+      success: true,
+      message: 'Đăng xuất thành công',
     });
   } catch (error) {
     console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: 'Lỗi server',
+    });
   }
 };
 
-module.exports = {  login, refreshToken, logout };
+module.exports = { login, refreshToken, logout };

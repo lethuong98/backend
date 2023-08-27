@@ -12,7 +12,6 @@ const authRoutes = require('./src/routes/auth.route');
 const categoryRoutes = require('./src/routes/category.route');
 const colorRoutes = require('./src/routes/color.route');
 const sizeRoutes = require('./src/routes/size.route');
-const feedbackRoutes = require('./src/routes/feedback.route');
 const productRoutes = require('./src/routes/product.route');
 const bannersRoutes = require('./src/routes/banners.route');
 const blogRoutes = require('./src/routes/blog.route');
@@ -28,7 +27,6 @@ app.use(
     origin: ['http://localhost:3000', 'http://localhost:3001'],
   })
 );
-//dfg
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
@@ -37,7 +35,6 @@ app.use('/auth', authRoutes);
 app.use('/category', categoryRoutes);
 app.use('/color', colorRoutes);
 app.use('/size', sizeRoutes);
-app.use('/feed-back', feedbackRoutes);
 app.use('/product', productRoutes);
 app.use('/banners', bannersRoutes);
 app.use('/blog', blogRoutes);

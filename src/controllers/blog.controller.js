@@ -1,13 +1,13 @@
 const db = require('../models/index');
 const { Op } = require('sequelize');
-const fs = require('fs');
 const path = require('path');
 const cloudinary = require('cloudinary').v2;
 
 const getAllBlog = async (req, res) => {
   const searchKeyword = req.query.searchKeyword || '';
-  const rowsPerPage = Number(req.query.rowsPerPage) || 5;
-  const offSet = Number(req.query.page) * rowsPerPage || 0;
+  const rowsPerPage = Number(req.query.rowsPerPage) || 100;
+  const page = Number(req.query.page) || 0;
+  const offSet = page * rowsPerPage || 0;
   const sortBy = req.query.sortBy || 'createdAt';
   const sorted = req.query.sorted || 'desc';
   let filter = {
@@ -16,17 +16,16 @@ const getAllBlog = async (req, res) => {
     },
   };
   try {
-    const data = await db.Blog.findAll({
+    const {count, rows} = await db.Blog.findAndCountAll({
       where: filter,
       order: [[sortBy, sorted]],
       limit: Number(rowsPerPage),
       offset: offSet,
     });
-    const dataToGetTotal = await db.Blog.findAll({ where: filter });
 
     return res.status(200).send({
-      data: data,
-      total: dataToGetTotal.length,
+      data: rows,
+      total: count,
     });
   } catch (error) {
     console.log('error', error);

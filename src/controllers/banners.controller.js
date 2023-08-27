@@ -6,19 +6,19 @@ const cloudinary = require('cloudinary').v2;
 
 const getAllBanners = async (req, res) => {
   const rowsPerPage = Number(req.query.rowsPerPage) || 100;
-  const offSet = Number(req.query.page) * rowsPerPage || 0;
+  const page = Number(req.query.page) || 0;
+  const offSet = page * rowsPerPage;
 
   try {
-    const data = await db.Banners.findAll({
+    const { count, rows } = await db.Banners.findAndCountAll({
       order: [['createdAt', 'DESC']],
       limit: rowsPerPage,
       offset: offSet,
     });
-    const dataToGetTotal = await db.Banners.findAll();
 
     return res.status(200).send({
-      data: data,
-      total: dataToGetTotal.length,
+      data: rows,
+      total: count,
     });
   } catch (error) {
     console.log('error', error);
@@ -58,6 +58,7 @@ const getBanners = async (req, res) => {
       data,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).send({ success: false, message: 'Lỗi server' });
   }
 };
@@ -101,7 +102,7 @@ const updateBanners = async (req, res) => {
     );
     return res.status(201).send({
       success: true,
-      message: 'Sửa tài khoản thành công',
+      message: 'Sửa banners thành công',
       data,
     });
   } catch (error) {

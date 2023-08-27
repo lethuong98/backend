@@ -1,9 +1,6 @@
 const db = require('../models/index');
 const { Op } = require('sequelize');
-const fs = require('fs');
-const path = require('path');
 const moment = require('moment');
-const { filter } = require('lodash');
 
 const createDetail = async (data) => {
   return await db.OrderDetail.create({
@@ -148,7 +145,6 @@ const getRevenue = async (req, res) => {
   }
 };
 const getOrders = async (req, res) => {
-  console.log(req.query)
   const searchKeyword = req.query.searchKeyword || '';
   const date = req.query.date || '';
   const page = Number(req.query.page) || 0;

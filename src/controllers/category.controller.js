@@ -1,15 +1,19 @@
 const db = require('../models/index');
 
 const getCategorys = async (req, res) => {
-  const rowsPerPage = Number(req.query.rowsPerPage);
-  const offSet = Number(req.query.page) * rowsPerPage;
+  const rowsPerPage = Number(req.query.rowsPerPage) || 100;
+  const page = Number(req.query.page) || 0;
+  const offSet = page * rowsPerPage;
   try {
-    const data = await db.Category.findAll({ limit: Number(rowsPerPage), offset: offSet });
-    const dataToGetTotal = await db.Category.findAll();
-    if (data) {
+    const { count, rows } = await db.Category.findAndCountAll({
+      limit: Number(rowsPerPage),
+      offset: offSet,
+    });
+
+    if (rows) {
       return res.status(200).send({
-        data: data,
-        total: dataToGetTotal.length,
+        data: rows,
+        total: count,
       });
     }
   } catch (error) {

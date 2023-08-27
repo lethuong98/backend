@@ -1,24 +1,9 @@
 const db = require('../models/index');
 const { Op } = require('sequelize');
-const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const moment = require('moment');
 const cloudinary = require('cloudinary').v2;
-
-// cloudinary.config({
-//   cloud_name: process.env.CLOUDINARY_NAME,
-//   api_key: process.env.CLOUDINARY_KEY,
-//   api_secret: process.env.CLOUDINARY_SECRET,
-// });
-
-// cloudinary.api.delete_resources(
-//   ['users/trang-ao-po-lo-nu-2_xy7vct', 'users/trang-ao-po-lo-nu-1_1692783898424'],
-//   function (error, result) {
-//     console.log(error);
-//     console.log(result);
-//   }
-// );
 
 const getUsers = async (req, res) => {
   const role = req.query.role || 0;
@@ -28,6 +13,8 @@ const getUsers = async (req, res) => {
   const searchKeyword = req.query.searchKeyword || '';
   const month = req.query.month || '';
   const date = req.query.date || '';
+  const sortBy = req.query.sortBy || 'createdAt';
+  const sorted = req.query.sorted || 'desc';
 
   let filter = {
     role: role || [1, 2, 3],
@@ -76,21 +63,17 @@ const getUsers = async (req, res) => {
     };
   }
   try {
-    const data = await db.User.findAll({
+    const { count, rows } = await db.User.findAndCountAll({
       attributes: { exclude: ['password'] },
       where: filter,
-      order: [['createdAt', 'DESC']],
-      limit: Number(rowsPerPage),
+      order: [[sortBy, sorted]],
+      limit: rowsPerPage,
       offset: offSet,
-    });
-    const dataToGetTotal = await db.User.findAll({
-      attributes: ['id'],
-      where: filter,
     });
 
     return res.status(200).send({
-      data: data,
-      total: dataToGetTotal.length,
+      data: rows,
+      total: count,
     });
   } catch (error) {
     console.log('error', error);
@@ -108,7 +91,10 @@ const getAuthor = async (req, res) => {
         data: data,
       });
     }
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send('Lỗi server');
+  }
 };
 
 const createUser = async (req, res) => {
@@ -170,6 +156,37 @@ const changePassword = async (req, res) => {
     console.log('error', error);
   }
 };
+const forgetPassword = async (req, res) => {
+  try {
+    const email = req.body?.email || '';
+    if (!email) {
+      return res.status(400).send({ success: false, message: 'Vui lòng nhập email' });
+    }
+    const data = await db.User.findOne({
+      where: {
+        email,
+      },
+    });
+    if (!data) return res.status(404).send({ success: false, message: 'Tài khoản không tồn tại' });
+    const data2 = await db.User.update(
+      {
+        password: crypto.createHash('md5').update('12345678').digest('hex'),
+      },
+      {
+        where: {
+          email,
+        },
+      }
+    );
+    if (!data2) return res.status(200).send({ success: false, message: 'Quên mật khẩu thất bại' });
+    return res
+      .status(200)
+      .send({ success: true, message: 'Quên mật khẩu thành công', data: '12345678' });
+  } catch (error) {
+    console.log('error', error);
+    return res.status(500).send({ success: false, message: 'Lỗi server' });
+  }
+};
 const getUser = async (req, res) => {
   try {
     const data = await db.User.findByPk(req.params.id);
@@ -213,7 +230,7 @@ const updateUser = async (req, res) => {
       return res.status(201).send({
         success: true,
         message: 'Sửa tài khoản thành công',
-        data,
+        data: avatar,
       });
     } catch (error) {
       console.log(error);
@@ -233,9 +250,15 @@ const updateUser = async (req, res) => {
         },
       }
     );
-    return res.status(201).send({
+    if (data) {
+      return res.status(201).send({
+        success: true,
+        message: 'Sửa tài khoản thành công',
+      });
+    }
+    return res.status(401).send({
       success: true,
-      message: 'Sửa tài khoản thành công',
+      message: 'Sửa tài khoản thất bại',
     });
   } catch (error) {
     console.log(error);
@@ -247,9 +270,7 @@ const deleteUser = async (req, res) => {
     const dataDelete = await db.User.findByPk(req.params.id);
     const avatar = dataDelete?.avatar;
     if (avatar) {
-      cloudinary.uploader.destroy(
-          `users/${path.basename(avatar, path.extname(avatar))}`
-        );
+      cloudinary.uploader.destroy(`users/${path.basename(avatar, path.extname(avatar))}`);
     }
     const data = await db.User.destroy({
       where: {
@@ -275,4 +296,5 @@ module.exports = {
   deleteUser,
   getAuthor,
   changePassword,
+  forgetPassword,
 };

@@ -1,5 +1,4 @@
 const db = require('../models/index');
-const fs = require('fs');
 const { Op } = require('sequelize');
 const path = require('path');
 const _ = require('lodash');
